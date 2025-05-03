@@ -129,7 +129,14 @@ func testCommandExecute(
 			if err := printCheckResult(test.Test.Checks, *responses, rc, &resultsTable); err != nil {
 				return fmt.Errorf("failed to print test result (%w)", err)
 			}
-			fullTable.AddFailed(resultsTable.RawRows...)
+
+			// Only add rows that are actually failures (not expected failures)
+			for _, row := range resultsTable.RawRows {
+				if row.IsFailure {
+					fullTable.Add(row)
+				}
+			}
+
 			printer := table.NewTablePrinter(out)
 			fmt.Fprintln(out)
 			printer.Print(resultsTable.Rows(detailedResults))
